@@ -28,7 +28,6 @@ and systemd.
 6. Run: docker compose up -d --build
 7. Open: http://37.27.39.68:8001/dashboard
 
-API documentation: http://37.27.39.68:8001/docs
 
 ## Automatic recording
 
