@@ -1,75 +1,104 @@
 # Weather Analytics
 
-A personal full-stack weather and air-quality dashboard for China.
+A weather and air-quality analytics platform with a Python/FastAPI backend, PostgreSQL storage, and an interactive web dashboard for locations across China.
+
+## Live Dashboard
+
+[Open Weather Analytics](http://37.27.39.68:8001/dashboard)
+
+Select a city to explore current weather, air quality, forecasts, and recorded readings.
 
 ## Features
 
-- Search cities and filter by province
-- Current weather and seven-day forecasts
-- PM2.5, PM10, and US AQI
-- Interactive temperature charts
-- PostgreSQL weather history with duplicate protection
-- Automatic recording every 30 minutes using systemd
-- Responsive interface with a decorative Shanghai skyline
+- Search locations and filter by province
+- View current weather and seven-day forecasts
+- Monitor PM2.5, PM10, and US AQI
+- Explore temperature trends with interactive charts
+- Store weather readings in PostgreSQL with duplicate protection
+- Collect weather automatically every 30 minutes using systemd
+- Use a responsive dashboard with a Shanghai skyline background for Shanghai
 
+## Dashboard Preview
 
-## Screenshots
+### Current Weather and Air Quality
 
-### Weather and air quality
+Displays temperature, humidity, wind speed, PM2.5, PM10, and US AQI for the selected location.
 
 ![Current weather and air-quality dashboard](docs/images/dashboard.png)
 
-### Seven-day forecast
+### Seven-Day Forecast
+
+Shows daily weather conditions, high and low temperatures, and precipitation probabilities.
 
 ![Seven-day weather forecast](docs/images/forecast.png)
 
-### Temperature trends and recorded weather
+### Temperature Trends and Recorded Weather
+
+Visualizes forecast temperatures and displays weather readings stored in PostgreSQL.
 
 ![Temperature chart and recorded weather history](docs/images/history.png)
 
 ## Technologies
 
-Python, FastAPI, asynchronous programming, REST APIs, PostgreSQL,
-SQLite, HTML, CSS, JavaScript, Chart.js, Docker Compose, Linux,
-and systemd.
+- **Backend:** Python, FastAPI, REST APIs, asynchronous programming
+- **Databases:** PostgreSQL, SQL, SQLite
+- **Frontend:** HTML, CSS, JavaScript, Chart.js
+- **Deployment:** Docker, Docker Compose, Linux, systemd
+- **Development:** Git, GitHub, GitHub Actions
 
-## Setup
+## Local Setup
 
-1. Install Python 3.12 or newer and Docker with Docker Compose.
-2. Copy .env.example to .env.
-3. Set a strong POSTGRES_PASSWORD in .env.
-4. Run: python3 app/data/build_locations.py
-5. Run: python3 app/data/build_location_db.py
-6. Run: docker compose up -d --build
-7. Open: http://37.27.39.68:8001/dashboard
+Requires Python 3.12 or newer and Docker with Docker Compose.
 
+1. Clone the repository and open its directory.
+2. Copy `.env.example` to `.env`.
+3. Set a strong `POSTGRES_PASSWORD` in `.env`.
+4. Prepare the location data:
 
-## Automatic recording
+   ```bash
+   python3 app/data/build_locations.py
+   python3 app/data/build_location_db.py
+   ```
 
-The deployment files assume the project is at /opt/weather-analytics.
+5. Build and start the application:
 
-Copy deploy/weather-collector.service and deploy/weather-collector.timer
-to /etc/systemd/system/, then run:
+   ```bash
+   docker compose up -d --build
+   ```
 
-    sudo systemctl daemon-reload
-    sudo systemctl enable --now weather-collector.timer
+6. Open `http://localhost:8001/dashboard` on the computer running the application.
 
-A city joins the recording list after its first successful dashboard
-recording. Collection continues at :00 and :30 even when the browser closes.
+To use the hosted version, follow the Live Dashboard link above.
 
-Recorded timestamps represent the provider's weather time.
-Actual collection time is stored separately.
-Air-quality values are displayed but are not yet stored in history.
+## Automatic Data Collection
 
-## Data sources
+The deployment files assume the project is installed at `/opt/weather-analytics`. Adjust the service path if necessary.
 
-Weather and geocoding: Open-Meteo — https://open-meteo.com/
-Air quality: CAMS — https://atmosphere.copernicus.eu/
-Location data: GeoNames — https://www.geonames.org/ (CC BY 4.0)
+Install and enable the timer:
 
+```bash
+sudo cp deploy/weather-collector.service /etc/systemd/system/
+sudo cp deploy/weather-collector.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now weather-collector.timer
+```
 
-Data are model-based estimates. US AQI differs from China's AQI scale.
+A location joins the collection list after its first successful dashboard recording. The server then collects weather at `:00` and `:30` each hour, even when the browser is closed.
 
-## Project status
+Recorded timestamps represent the provider’s weather time. Collection time is stored separately. Air-quality values are displayed but are not currently stored in history.
 
-Personal portfolio demonstration.
+## Continuous Integration
+
+GitHub Actions checks Python and dashboard JavaScript syntax, validates Docker Compose configuration, and builds the application image.
+
+## Data Sources
+
+- **Weather and geocoding:** [Open-Meteo](https://open-meteo.com/)
+- **Air quality:** [CAMS](https://atmosphere.copernicus.eu/) through Open-Meteo
+- **Location data:** [GeoNames](https://www.geonames.org/) — CC BY 4.0
+
+Data are model-based estimates. US AQI differs from China’s AQI scale.
+
+## Project Status
+
+Personal software development and portfolio project.
