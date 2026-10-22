@@ -51,7 +51,7 @@ Air-quality values are displayed but are not yet stored in history.
 Weather and geocoding: Open-Meteo — https://open-meteo.com/
 Air quality: CAMS — https://atmosphere.copernicus.eu/
 Location data: GeoNames — https://www.geonames.org/ (CC BY 4.0)
-Skyline image: AI-generated decorative artwork.
+
 
 Data are model-based estimates. US AQI differs from China's AQI scale.
 
