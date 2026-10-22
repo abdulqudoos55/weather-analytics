@@ -1,0 +1,72 @@
+name: Project checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Python syntax
+        run: python3 -m compileall -q app
+
+      - name: Extract dashboard JavaScript
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.active = False
+                  self.parts = []
+                  self.current = []
+
+              def handle_starttag(self, tag, attrs):
+                  if tag == "script":
+                      self.active = "src" not in dict(attrs)
+                      self.current = []
+
+              def handle_data(self, data):
+                  if self.active:
+                      self.current.append(data)
+
+              def handle_endtag(self, tag):
+                  if tag == "script" and self.active:
+                      self.parts.append("".join(self.current))
+                      self.active = False
+
+          output = Path("/tmp/dashboard-checks")
+          output.mkdir(exist_ok=True)
+          for filename in ("index.html", "china.html"):
+              parser = Scripts()
+              parser.feed(
+                  (Path("app/static") / filename).read_text()
+              )
+              if not parser.parts:
+                  raise SystemExit(f"No scripts found in {filename}")
+              (output / (filename + ".js")).write_text(
+                  "\n;\n".join(parser.parts)
+              )
+          PY
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check /tmp/dashboard-checks/index.html.js
+          node --check /tmp/dashboard-checks/china.html.js
+
+      - name: Validate Docker Compose
+        env:
+          POSTGRES_PASSWORD: ci-placeholder-only
+        run: docker compose config --quiet
+
+      - name: Build application image
+        run: docker build -t weather-analytics:check .

@@ -1,0 +1,11 @@
+[Unit]
+Description=Record weather for tracked cities
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/weather-analytics
+ExecStart=/usr/bin/docker compose exec -T web python -m app.collect_weather
+TimeoutStartSec=20min

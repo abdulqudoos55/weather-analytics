@@ -1,0 +1,4 @@
+Source: GeoNames geographical database
+https://www.geonames.org/
+Licence: Creative Commons Attribution 4.0
+Coverage follows GeoNames country and administrative coding.

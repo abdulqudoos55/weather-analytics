@@ -1,0 +1,30 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Previous versions
+*.backup-*
+*.before-*
+*backup-*
+*.before-redesign.html
+app/static/saved-readings.html
+
+# Generated location data
+app/data/china_locations.json
+app/data/locations.sqlite
+app/data/locations.sqlite-*
+
+# Logs
+*.log
+
