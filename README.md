@@ -12,6 +12,21 @@ A personal full-stack weather and air-quality dashboard for China.
 - Automatic recording every 30 minutes using systemd
 - Responsive interface with a decorative Shanghai skyline
 
+
+## Screenshots
+
+### Weather and air quality
+
+![Current weather and air-quality dashboard](docs/images/dashboard.png)
+
+### Seven-day forecast
+
+![Seven-day weather forecast](docs/images/forecast.png)
+
+### Temperature trends and recorded weather
+
+![Temperature chart and recorded weather history](docs/images/history.png)
+
 ## Technologies
 
 Python, FastAPI, asynchronous programming, REST APIs, PostgreSQL,
