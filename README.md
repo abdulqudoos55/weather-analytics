@@ -26,9 +26,9 @@ and systemd.
 4. Run: python3 app/data/build_locations.py
 5. Run: python3 app/data/build_location_db.py
 6. Run: docker compose up -d --build
-7. Open: http://localhost:8001/dashboard
+7. Open: http://37.27.39.68:8001/dashboard
 
-API documentation: http://localhost:8001/docs
+API documentation: http://37.27.39.68:8001/docs
 
 ## Automatic recording
 
