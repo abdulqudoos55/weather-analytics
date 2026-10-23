@@ -9,3 +9,4 @@ Unit=weather-collector.service
 
 [Install]
 WantedBy=timers.target
+

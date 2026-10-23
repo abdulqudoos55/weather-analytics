@@ -36,3 +36,4 @@ db.execute("CREATE INDEX location_population ON locations(population DESC)")
 db.commit()
 print(f"Search database ready: {db.execute('SELECT COUNT(*) FROM locations').fetchone()[0]:,} locations")
 db.close()
+

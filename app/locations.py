@@ -92,3 +92,4 @@ def provinces(country: str = Query(default="CN", max_length=2)):
             (country.upper(),),
         ).fetchall()
     return {"provinces": [row["province"] for row in rows]}
+

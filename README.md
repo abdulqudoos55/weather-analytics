@@ -102,3 +102,4 @@ Data are model-based estimates. US AQI uses the United States air-quality index 
 ## Project Status
 
 Personal software development and portfolio project.
+

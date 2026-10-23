@@ -33,3 +33,4 @@ async def air_quality(location_id: int):
         "us_aqi": current.get("us_aqi"),
         "source": "Open-Meteo / CAMS",
     }
+

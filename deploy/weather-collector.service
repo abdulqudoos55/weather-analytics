@@ -9,3 +9,4 @@ Type=oneshot
 WorkingDirectory=/opt/weather-analytics
 ExecStart=/usr/bin/docker compose exec -T web python -m app.collect_weather
 TimeoutStartSec=20min
+

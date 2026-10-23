@@ -70,3 +70,4 @@ jobs:
 
       - name: Build application image
         run: docker build -t weather-analytics:check .
+

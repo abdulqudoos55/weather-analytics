@@ -202,3 +202,4 @@ app.mount(
     StaticFiles(directory=Path(__file__).parent / "static"),
     name="assets",
 )
+

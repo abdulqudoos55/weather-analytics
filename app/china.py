@@ -202,3 +202,4 @@ async def location_history(location_id: int):
             (f"cn:{location_id}",),
         )
         return {"readings": await cursor.fetchall()}
+

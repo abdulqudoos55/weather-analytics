@@ -97,3 +97,4 @@ print(
     f"{len(set(item['province'] for item in locations))} "
     "province-level areas."
 )
+
