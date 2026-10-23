@@ -1,6 +1,6 @@
 # Weather Analytics
 
-A weather and air-quality analytics platform with a Python/FastAPI backend, PostgreSQL storage, and an interactive web dashboard for locations across China.
+A global weather intelligence platform combining a Python/FastAPI backend, PostgreSQL storage, and an interactive dashboard for forecasts, air quality, and recorded weather across countries and regions.
 
 ## Live Dashboard
 
