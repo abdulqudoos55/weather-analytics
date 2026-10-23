@@ -466,11 +466,81 @@ caption{font-size:12px;padding-bottom:8px}
 }
 </style>
 
+
+<style id="compact-weather-history">
+/* Show only the ten newest rows in recorded weather. */
+#weather table tbody tr:nth-child(n+6) {
+    display: none;
+}
+
+/* Stop the chart growing with the history table. */
+#weather .chart {
+    position: relative;
+    height: 360px !important;
+    min-height: 360px !important;
+    max-height: 360px !important;
+    flex: none !important;
+}
+#weather .chart canvas {
+    max-height: 360px !important;
+}
+@media (max-width: 650px) {
+    #weather .chart {
+        height: 280px !important;
+        min-height: 280px !important;
+        max-height: 280px !important;
+    }
+    #weather .chart canvas {
+        max-height: 280px !important;
+    }
+}
+</style>
+
+
+<style id="compact-source-footer">
+main { padding-bottom: 8px !important; }
+#weather-source-credit {
+    margin: 0 !important;
+    padding: 6px 16px 10px !important;
+    min-height: 0 !important;
+    line-height: 1.4;
+}
+</style>
+
+
+<style id="world-location-controls">
+#locationMenu {
+    max-height: 75vh;
+    overflow-y: auto;
+}
+#locationMenu select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    margin: 6px 0 12px;
+    border: 1px solid #49617c;
+    border-radius: 8px;
+    background: #10233c;
+    color: #edf3ff;
+    font: inherit;
+}
+#locationMenu label {
+    display: block;
+    font-size: 13px;
+    margin-top: 8px;
+}
+#locationResults {
+    max-height: 260px;
+    overflow-y: auto;
+}
+</style>
+
 </head>
 <body>
 <header>
 <h1>Weather Analytics</h1>
-<p>China weather & air quality</p>
+<p>Worldwide weather & air quality</p>
 </header>
 <main>
 <section class="panel" aria-label="Location search">
@@ -519,7 +589,7 @@ placeholder="City name in English or Chinese" required>
 
 <section class="panel">
 <h2>Seven-day forecast</h2>
-<p>China Standard Time · UTC+8</p>
+<p>Location time · Local time</p>
 <div id="days" class="days"></div>
 </section>
 
@@ -536,7 +606,7 @@ aria-label="Seven-day high and low temperatures, also listed in the forecast car
 <h2>Recorded weather</h2>
 <p id="historyStatus" role="status"></p>
 <table>
-<caption>Automatic records · UTC+8</caption>
+<caption>Automatic records · Local time</caption>
 <thead><tr><th>Time</th><th>Temperature °C</th>
 <th>Humidity %</th><th>Wind km/h</th><th>Conditions</th></tr></thead>
 <tbody id="history"></tbody>
@@ -545,6 +615,27 @@ aria-label="Seven-day high and low temperatures, also listed in the forecast car
 </div>
 
 </main>
+
+<footer id="weather-source-credit" style="
+  text-align:center;
+  padding:20px 16px;
+  color:#aebfd5;
+  font-size:13px;
+">
+  Data sources:
+  <a href="https://open-meteo.com/" target="_blank"
+     rel="noopener noreferrer" style="color:inherit">Open-Meteo</a>
+  ·
+  <a href="https://atmosphere.copernicus.eu/" target="_blank"
+     rel="noopener noreferrer" style="color:inherit">CAMS</a>
+  ·
+  <a href="https://www.geonames.org/" target="_blank"
+     rel="noopener noreferrer" style="color:inherit">GeoNames</a>
+  (<a href="https://creativecommons.org/licenses/by/4.0/"
+      target="_blank" rel="noopener noreferrer"
+      style="color:inherit">CC BY 4.0</a>)
+</footer>
+
 
 <script>
 
@@ -557,6 +648,7 @@ if(window.Chart){
 
 const el = id => document.getElementById(id);
 let selectedId = 1805753;
+let weatherTimezone = 'Asia/Shanghai';
 let displayedId = null;
 let chart;
 let busy = false;
@@ -591,6 +683,12 @@ function textNode(tag,text){
 }
 
 async function history(id){
+
+  const historyPanel=el('history').closest('.panel');
+  if(historyPanel){
+    const caption=historyPanel.querySelector('caption');
+    if(caption)caption.textContent='Automatic records · '+weatherTimezone;
+  }
   el('history').replaceChildren();
   el('historyStatus').textContent='Loading saved readings…';
   try{
@@ -598,7 +696,7 @@ async function history(id){
     for(const reading of data.readings){
       const row=document.createElement('tr');
       const time=new Date(reading.observed_at).toLocaleString('en-GB',{
-        timeZone:'Asia/Shanghai',hour12:false
+        timeZone:weatherTimezone,hour12:false
       });
       [time,reading.temperature_c,reading.humidity_percent,
        reading.wind_speed_kmh].forEach(item=>{
@@ -622,7 +720,7 @@ async function history(id){
     }
     el('historyStatus').textContent=data.readings.length
       ? `${data.readings.length} saved`
-      : 'No readings saved yet. Click “Save reading” to begin.';
+      : 'No recorded readings yet.';
   }catch(error){
     el('historyStatus').textContent=error.message;
   }
@@ -690,8 +788,9 @@ function upgradeWeatherIcons(){
 }
 
 function render(data){
+  weatherTimezone=data.timezone||'UTC';
   el('query').value=data.city;
-  el('place').textContent=[data.city,data.province].filter(Boolean).join(', ');
+  el('place').textContent=[data.city,data.province,data.country].filter(Boolean).join(', ');
   el('conditions').replaceChildren();
   const currentIcon=textNode('span',weatherIcon(data.current.condition));
   currentIcon.setAttribute('aria-hidden','true');
@@ -701,7 +800,7 @@ function render(data){
     document.createTextNode(' '+data.current.condition)
   );
   el('updated').textContent=
-    `Updated: ${data.current.time.replace('T',' ')} (UTC+8)`;
+    `Updated: ${data.current.time.replace('T',' ')} (${data.timezone})`;
   el('temperature').textContent=value(data.current.temperature_c,' °C');
   el('humidity').textContent=value(data.current.humidity_percent,' %');
   el('wind').textContent=value(data.current.wind_speed_kmh,' km/h');
@@ -710,9 +809,9 @@ function render(data){
   data.days.forEach((day,index)=>{
     const card=document.createElement('article');
     card.className='day';
-    const date=new Date(`${day.date}T12:00:00+08:00`);
+    const date=new Date(`${day.date}T12:00:00Z`);
     const heading=index===0?'Today':date.toLocaleDateString('en-GB',{
-      weekday:'short',timeZone:'Asia/Shanghai'
+      weekday:'short',timeZone:'UTC'
     });
     const icon=textNode('div',weatherIcon(day.condition));
     icon.className='weather-icon';
@@ -777,7 +876,7 @@ async function loadAir(id){
     el('pm10').textContent=value(data.pm10,' µg/m³');
     el('usAqi').textContent=value(data.us_aqi);
     el('airStatus').textContent=
-      `Updated: ${(data.time||'Unavailable').replace('T',' ')} (UTC+8)`;
+      `Updated: ${(data.time||'Unavailable').replace('T',' ')} (${data.timezone||'UTC'})`;
   }catch(error){
     el('airStatus').textContent=
       'Air quality unavailable. '+error.message;
@@ -832,7 +931,7 @@ el('searchForm').addEventListener('submit',event=>{
     }
     selectedId=Number(el('locations').value);
     await loadForecast();
-  },'Searching China and loading weather…');
+  },'Searching locations and loading weather…');
 });
 
 el('locations').addEventListener('change',()=>{
@@ -890,6 +989,7 @@ setInterval(() => {
 }, autoInterval);
 
 
+
 (function(){
   const form=el('searchForm');
   const oldSelect=el('locations');
@@ -905,10 +1005,17 @@ setInterval(() => {
       Choose a city ▾
     </button>
     <div id="locationMenu" hidden>
-      <label for="locationQuery">Search cities or provinces</label>
+      <label for="countrySelect">Country / area</label>
+      <select id="countrySelect">
+        <option value="">All countries / areas</option>
+      </select>
+      <label for="regionSelect">State / province</label>
+      <select id="regionSelect" disabled>
+        <option value="">All regions</option>
+      </select>
+      <label for="locationQuery">Search locations</label>
       <input id="locationQuery" autocomplete="off"
-        placeholder="Type a city name…" maxlength="100">
-      <div id="provinceList" aria-label="Filter by province"></div>
+        placeholder="City, region, or country…" maxlength="100">
       <p id="locationMessage" role="status"></p>
       <div id="locationResults" aria-label="Matching locations"></div>
       <button type="button" id="moreLocations" hidden>Load more</button>
@@ -916,36 +1023,31 @@ setInterval(() => {
   `;
   form.after(host);
 
-  let province='',offset=0,version=0,timer;
-  const menu=el('locationMenu');
-  const toggle=el('locationToggle');
+  const menu=el('locationMenu'),toggle=el('locationToggle');
+  let offset=0,version=0,regionVersion=0,timer;
 
   function close(){
     menu.hidden=true;
     toggle.setAttribute('aria-expanded','false');
   }
-
   function sync(){
-    if(displayedId){
-      toggle.textContent=el('place').textContent+' ▾';
-    }
+    if(displayedId)toggle.textContent=el('place').textContent+' ▾';
     toggle.disabled=busy;
   }
-
   new MutationObserver(sync).observe(el('place'),{
     childList:true,subtree:true
   });
   new MutationObserver(sync).observe(el('refreshBtn'),{
     attributes:true,attributeFilter:['disabled']
   });
-  sync();
 
   async function choose(item){
     if(busy)return;
     selectedId=item.id;
-    oldSelect.replaceChildren(
-      new Option(item.name+', '+item.province,item.id)
-    );
+    oldSelect.replaceChildren(new Option(
+      [item.name,item.province,item.country].filter(Boolean).join(', '),
+      item.id
+    ));
     close();
     toggle.focus();
     await run(loadForecast,'Loading '+item.name+'…');
@@ -962,13 +1064,13 @@ setInterval(() => {
     el('locationMessage').textContent='Loading locations…';
     const params=new URLSearchParams({
       q:el('locationQuery').value.trim(),
-      province,
+      country:el('countrySelect').value,
+      province:el('regionSelect').value,
       offset:String(offset)
     });
     try{
       const data=await api('/api/locations?'+params);
       if(token!==version)return;
-
       for(const item of data.locations){
         const button=document.createElement('button');
         button.type='button';
@@ -976,50 +1078,54 @@ setInterval(() => {
         const name=document.createElement('span');
         name.textContent=item.name;
         const area=document.createElement('small');
-        area.textContent=item.province;
+        area.textContent=[item.province,item.country]
+          .filter(Boolean).join(' · ');
         button.append(name,area);
         button.addEventListener('click',()=>choose(item));
-        el('locationResults').appendChild(button);
+        el('locationResults').append(button);
       }
-
       offset+=data.locations.length;
       el('locationMessage').textContent=offset
-        ? `${offset} locations shown`:'No matching locations.';
+        ?`${offset} locations shown`:'No matching locations.';
       el('moreLocations').hidden=!data.has_more;
     }catch(error){
       if(token===version)el('locationMessage').textContent=error.message;
     }
   }
 
-  function provinceButton(name,label){
-    const button=document.createElement('button');
-    button.type='button';
-    button.textContent=label;
-    button.setAttribute('aria-pressed',String(name===province));
-    button.addEventListener('click',()=>{
-      province=name;
-      for(const child of el('provinceList').children){
-        child.setAttribute('aria-pressed',String(child===button));
+  el('countrySelect').addEventListener('change',async()=>{
+    const token=++regionVersion;
+    clearTimeout(timer);
+    ++version;
+    const region=el('regionSelect');
+    region.replaceChildren(new Option('All regions',''));
+    region.disabled=true;
+    list();
+    const country=el('countrySelect').value;
+    if(!country)return;
+    try{
+      const data=await api('/api/locations/provinces?country='+
+        encodeURIComponent(country));
+      if(token!==regionVersion)return;
+      for(const name of data.provinces){
+        region.append(new Option(name,name));
       }
-      list();
-    });
-    return button;
-  }
-
+      region.disabled=!data.provinces.length;
+    }catch(error){
+      if(token===regionVersion)el('locationMessage').textContent=error.message;
+    }
+  });
+  el('regionSelect').addEventListener('change',()=>list());
   toggle.addEventListener('click',()=>{
     menu.hidden=!menu.hidden;
     toggle.setAttribute('aria-expanded',String(!menu.hidden));
-    if(!menu.hidden){
-      el('locationQuery').focus();
-      list();
-    }
+    if(!menu.hidden){el('locationQuery').focus();list();}
   });
-
   el('locationQuery').addEventListener('input',()=>{
     clearTimeout(timer);
     ++version;
     el('moreLocations').hidden=true;
-    timer=setTimeout(()=>list(),350);
+    timer=setTimeout(()=>list(),400);
   });
   el('moreLocations').addEventListener('click',()=>list(false));
   host.addEventListener('keydown',event=>{
@@ -1031,16 +1137,17 @@ setInterval(() => {
 
   (async()=>{
     try{
-      const data=await api('/api/locations/provinces');
-      el('provinceList').appendChild(provinceButton('','All provinces'));
-      for(const name of data.provinces){
-        el('provinceList').appendChild(provinceButton(name,name));
+      const data=await api('/api/locations/countries');
+      for(const country of data.countries){
+        el('countrySelect').append(new Option(country.name,country.code));
       }
     }catch(error){
       el('locationMessage').textContent=error.message;
     }
   })();
+  sync();
 })();
+
 
 </script>
 <script id="approved-layout-script">
@@ -1097,12 +1204,12 @@ setInterval(() => {
 
     document.querySelectorAll('.day').forEach((card,index)=>{
       const day=data.days[index];
-      const date=new Date(day.date+'T12:00:00+08:00');
+      const date=new Date(day.date+'T12:00:00Z');
       const heading=index===0?'Today':date.toLocaleDateString('en-GB',{
-        weekday:'short',timeZone:'Asia/Shanghai'
+        weekday:'short',timeZone:'UTC'
       });
       const shortDate=date.toLocaleDateString('en-GB',{
-        day:'numeric',month:'short',timeZone:'Asia/Shanghai'
+        day:'numeric',month:'short',timeZone:'UTC'
       });
 
       card.replaceChildren();
@@ -1140,8 +1247,8 @@ setInterval(() => {
       chart.data.datasets[1].borderColor='#48cdff';
       chart.data.datasets[1].backgroundColor='#48cdff';
       chart.data.labels=data.days.map(day=>
-        new Date(day.date+'T12:00:00+08:00').toLocaleDateString('en-GB',{
-          day:'numeric',month:'short',timeZone:'Asia/Shanghai'
+        new Date(day.date+'T12:00:00Z').toLocaleDateString('en-GB',{
+          day:'numeric',month:'short',timeZone:'UTC'
         })
       );
       chart.update('none');
@@ -1190,6 +1297,59 @@ setInterval(() => {
     });
     applyCityLayout();
   }
+})();
+</script>
+
+
+<style id="balanced-weather-chart">
+#weather {
+    align-items: stretch;
+}
+#weather .balanced-chart-panel {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    min-height: 0;
+}
+#weather .balanced-chart-panel .chart {
+    position: relative;
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 300px !important;
+    max-height: none !important;
+    width: 100%;
+}
+#weather .balanced-chart-panel .chart canvas {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+}
+@media(max-width:650px) {
+    #weather .balanced-chart-panel .chart {
+        flex: none !important;
+        height: 280px !important;
+        min-height: 280px !important;
+    }
+}
+</style>
+<script id="balanced-weather-chart-script">
+(function(){
+    function balanceChart(){
+        document.querySelectorAll('#weather .chart').forEach(function(chart){
+            const panel=chart.closest('.panel');
+            if(panel)panel.classList.add('balanced-chart-panel');
+        });
+    }
+    balanceChart();
+    const weather=document.getElementById('weather');
+    if(weather){
+        new MutationObserver(balanceChart).observe(weather,{
+            childList:true,
+            subtree:true
+        });
+    }
 })();
 </script>
 

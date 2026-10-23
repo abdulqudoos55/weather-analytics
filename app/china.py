@@ -5,6 +5,11 @@ router = APIRouter(prefix="/api/china")
 
 
 async def fetch_json(url, params):
+    if url == "https://geocoding-api.open-meteo.com/v1/get":
+        from app.locations import lookup_location
+        location = lookup_location(int(params["id"]))
+        if location:
+            return location
     try:
         async with httpx.AsyncClient(timeout=25) as client:
             response = await client.get(url, params=params)
@@ -25,7 +30,6 @@ async def locations(q: str = Query(min_length=2, max_length=100)):
             "name": q.strip(),
             "count": 30,
             "language": "en",
-            "countryCode": "CN",
         },
     )
     return {
@@ -39,7 +43,6 @@ async def locations(q: str = Query(min_length=2, max_length=100)):
                 "longitude": item["longitude"],
             }
             for item in data.get("results", [])
-            if item.get("country_code") == "CN"
         ]
     }
 
@@ -78,11 +81,6 @@ async def forecast(location_id: int):
         "https://geocoding-api.open-meteo.com/v1/get",
         {"id": location_id, "language": "en"},
     )
-    if location.get("country_code") != "CN":
-        raise HTTPException(
-            status_code=404,
-            detail="Choose a location in China.",
-        )
 
     data = await fetch_json(
         "https://api.open-meteo.com/v1/forecast",
@@ -98,7 +96,7 @@ async def forecast(location_id: int):
                 "temperature_2m_min,precipitation_probability_max,"
                 "wind_speed_10m_max"
             ),
-            "timezone": "Asia/Shanghai",
+            "timezone": "auto",
             "forecast_days": 7,
         },
     )
@@ -113,8 +111,10 @@ async def forecast(location_id: int):
 
     return {
         "city": location["name"],
+        "country": location.get("country", ""),
+        "country_code": location.get("country_code", ""),
         "province": location.get("admin1", ""),
-        "timezone": "Asia/Shanghai",
+        "timezone": data["timezone"],
         "source": "Open-Meteo",
         "current": {
             "time": current["time"],
@@ -150,7 +150,7 @@ async def save_location_weather(location_id: int):
     data = await forecast(location_id)
     current = data["current"]
     observed = datetime.fromisoformat(current["time"]).replace(
-        tzinfo=ZoneInfo("Asia/Shanghai")
+        tzinfo=ZoneInfo(data["timezone"])
     )
     async with await psycopg.AsyncConnection.connect(
         os.environ["DATABASE_URL"]

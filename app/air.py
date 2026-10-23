@@ -10,8 +10,6 @@ async def air_quality(location_id: int):
         "https://geocoding-api.open-meteo.com/v1/get",
         {"id": location_id, "language": "en"},
     )
-    if location.get("country_code") != "CN":
-        raise HTTPException(status_code=404, detail="Choose a location in China.")
 
     data = await fetch_json(
         "https://air-quality-api.open-meteo.com/v1/air-quality",
@@ -19,7 +17,7 @@ async def air_quality(location_id: int):
             "latitude": location["latitude"],
             "longitude": location["longitude"],
             "current": "pm2_5,pm10,us_aqi",
-            "timezone": "Asia/Shanghai",
+            "timezone": "auto",
         },
     )
     current = data.get("current")
@@ -29,7 +27,7 @@ async def air_quality(location_id: int):
     return {
         "city": location["name"],
         "time": current.get("time"),
-        "timezone": "Asia/Shanghai",
+        "timezone": data.get("timezone", "UTC"),
         "pm25": current.get("pm2_5"),
         "pm10": current.get("pm10"),
         "us_aqi": current.get("us_aqi"),

@@ -28,3 +28,10 @@ app/data/locations.sqlite-*
 # Logs
 *.log
 
+
+app/data/world_locations*.sqlite
+app/data/cities500.zip
+app/data/countryInfo.txt
+app/data/admin1CodesASCII.txt
+app/data/*.download
+backups/
