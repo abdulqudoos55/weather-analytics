@@ -6,7 +6,7 @@ A global weather intelligence platform combining a Python/FastAPI backend, Postg
 
 [Open Weather Analytics](http://37.27.39.68:8001/dashboard)
 
-Select a city to explore current weather, air quality, forecasts, and recorded readings.
+Explore weather, air quality, forecasts, and recorded readings for cities worldwide.
 
 ## Features
 
