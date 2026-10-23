@@ -10,12 +10,12 @@ Explore weather, air quality, forecasts, and recorded readings for cities worldw
 
 ## Features
 
-- Search locations and filter by province
+- Search cities worldwide and filter by country and region
 - View current weather and seven-day forecasts
 - Monitor PM2.5, PM10, and US AQI
 - Explore temperature trends with interactive charts
 - Store weather readings in PostgreSQL with duplicate protection
-- Collect weather automatically every 30 minutes using systemd
+- Automatically collect weather for tracked locations every 30 minutes using systemd
 - Use a responsive dashboard with a Shanghai skyline background for Shanghai
 
 ## Dashboard Preview
