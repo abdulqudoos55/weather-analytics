@@ -97,7 +97,7 @@ GitHub Actions checks Python and dashboard JavaScript syntax, validates Docker C
 - **Air quality:** [CAMS](https://atmosphere.copernicus.eu/) through Open-Meteo
 - **Location data:** [GeoNames](https://www.geonames.org/) — CC BY 4.0
 
-Data are model-based estimates. US AQI differs from China’s AQI scale.
+Data are model-based estimates. US AQI uses the United States air-quality index scale.
 
 ## Project Status
 
