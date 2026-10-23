@@ -16,7 +16,7 @@ Explore weather, air quality, forecasts, and recorded readings for cities worldw
 - Explore temperature trends with interactive charts
 - Store weather readings in PostgreSQL with duplicate protection
 - Automatically collect weather for tracked locations every 30 minutes using systemd
-- Use a responsive dashboard with a Shanghai skyline background for Shanghai
+- Use a responsive web dashboard
 
 ## Dashboard Preview
 
